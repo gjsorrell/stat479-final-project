@@ -215,7 +215,7 @@ review_date: The date the review was written.</p>
 </div>
 <div id="statistical-methods" class="section level2">
 <h2>3. Statistical Methods:</h2>
-<p>We want to figure out if we can predict what star-rating a customer has given a product based on variables related to their review data. In this scenario, we decided to perform multiple linear regression to see if star-rating is significantly affected by:</p>
+<p>We want to figure out if we can predict what star-rating a customer has given based on variables related to their review data. In this scenario, we decided to perform multiple linear regression to see if star-rating is significantly affected by:</p>
 <ul>
 <li>ratio of helpful votes / total votes</li>
 <li>review length</li>
@@ -242,8 +242,9 @@ If none of the coefficients are significant, we will instead figure out if we ca
 <li>add a new column named “length_of_review” by counting the number of words in their review.</li>
 </ol></li>
 </ul></li>
-<li>Save cleaned data into a new csv file called clean_{number}.csv, where the number is 1 to 13. Second, after doing 13 parallel jobs, we combine 13 clean_{number}.csv into a single csv file called data.csv. Third, we perform the multi-linear regression on data.csv and get the p-value for each coefficient. Based on the p-value we have, we may rebuild the linear regression model to make it statistically significant and interpret the results.</li>
+<li>Save cleaned data into a new csv file called clean_{number}.csv, where the number is 1 to 13.</li>
 </ul>
+<p>Second, after doing 13 parallel jobs, we combine 13 clean_{number}.csv into a single csv file called data.csv. Third, we perform the multi-linear regression on data.csv and get the p-value for each coefficient. Based on the p-value we have, we may rebuild the linear regression model to make it statistically significant and interpret the results.</p>
 </div>
 <div id="github-link" class="section level2">
 <h2>5. GitHub link:</h2>
