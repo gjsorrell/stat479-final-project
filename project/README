@@ -4,12 +4,12 @@ Or run step by step
 #####################################################################
 ./pre.sh	   	#download, decompress, rename data
 
-condor_submit job.sh	#run 13 parallel jobs, from job.sh and job.R
+condor_submit job.sub	#run 13 parallel jobs, from job.sh and job.R
 			#create 13 cleaned tsv 
 
 ./merge.sh		#create a merged tsv of 13 cleaned tsv 
 
-condor_submit model.sh  #build logistic model and generate summary
+condor_submit model.sub  #build logistic model and generate summary
 #####################################################################
 
  
