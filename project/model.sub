@@ -1,0 +1,18 @@
+universe = vanilla
+
+log    =    log/model$(Cluster).log
+error  =  error/model$(Cluster).err
+output = output/model$(Cluster).out
+
+executable = ./model.sh
+arguments = merge.tsv summary
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+transfer_input_files = merge.tsv, http://proxy.chtc.wisc.edu/SQUID/chtc/R402.tar.gz, model.R
+
+request_cpus = 1
+request_memory = 3GB
+request_disk = 3GB
+
+queue 1
