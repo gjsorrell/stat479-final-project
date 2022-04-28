@@ -1,5 +1,10 @@
 #!/bin/bash
-cat $1.tsv | cut -f7,8,9,10,14 > extract_$1.tsv
+#decompress files
+url="${1}.tsv.gz"
+gzip -d $url
+
+#get only the necessary columns
+cat ${1}.tsv | cut -f7,8,9,10,14 > extract_${1}.tsv
 
 tar -xzf R402.tar.gz
 

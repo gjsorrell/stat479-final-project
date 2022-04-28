@@ -12,7 +12,7 @@ when_to_transfer_output = ON_EXIT
 transfer_input_files = merge.tsv, http://proxy.chtc.wisc.edu/SQUID/chtc/R402.tar.gz, model.R
 
 request_cpus = 1
-request_memory = 200MB
-request_disk = 200MB
+request_memory = 1GB
+request_disk = 1GB
 
 queue 1

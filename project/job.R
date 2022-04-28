@@ -1,7 +1,7 @@
 rm(list=ls())
 args = (commandArgs(trailingOnly=TRUE))
 if(length(args) == 1){
-  process = as.numeric(args[1])
+  process = args[1]
 } else {
   cat('usage: Rscript myscript.R <process number>\n', file=stderr())
   stop()

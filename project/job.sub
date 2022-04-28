@@ -1,18 +1,18 @@
 universe = vanilla
 
-log    =    log/$(Process).log
-error  =  error/$(Process).err
-output = output/$(Process).out
+log    =    log/$(filename).log
+error  =  error/$(filename).err
+output = output/$(filename).out
 
 executable = ./job.sh
-arguments = $(Process)
+arguments = $(filename)
 
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-transfer_input_files = $(Process).tsv, http://proxy.chtc.wisc.edu/SQUID/chtc/R402.tar.gz, job.R
+transfer_input_files = https://s3.amazonaws.com/amazon-reviews-pds/tsv/$(filename).tsv.gz, http://proxy.chtc.wisc.edu/SQUID/chtc/R402.tar.gz, job.R
 
 request_cpus = 1
 request_memory = 3GB   
 request_disk = 3.5GB  
 
-queue 13
+queue filename from files.txt
