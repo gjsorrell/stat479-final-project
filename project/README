@@ -1,4 +1,4 @@
-Run 'condor_submit_dag' to cause all the code to run
+Run 'condor_submit_dag submit.dag' to run all code
 
 Or run step by step
 #####################################################################
