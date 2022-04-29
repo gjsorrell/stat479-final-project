@@ -10,12 +10,7 @@
 #            \ | /
 #              V
 # (post 1) merge.sh
-#              |
-#              V
-# (job 2)  model.sub (run model.sh, model.R)
+
 job 1 job.sub
-job 2 model.sub
 script pre 1 pre.sh
 script post 1 merge.sh
-
-parent 1 child 2
