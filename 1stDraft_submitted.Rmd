@@ -1,0 +1,144 @@
+---
+title: "Amazon Reviews Data"
+author: "Sherry Yang, Chengjing Gong, Gregory Sorrell, Sungkyun Lee"
+date: "4/29/2022"
+output: html_document
+---
+
+
+```{r, echo =F, warning=FALSE}
+library(ggplot2)
+```
+
+# 1. Introduction
+
+We analyzed a large data set of Amazon reviews separated by product category. The initial data set consists of 13 different tsv files, where each row represents a single review and its associated metadata, such as **review date**, **review text**, and **star rating**, etc.
+
+We want to explore whether users' review behavior is correlated with the star rating (from 1 to 5) they assign to products. More specifically, how **the ratio of helpful votes (ratio)** and **length of review text (length)** could affect **star rating**. To pursue this question, we utilized CHTC to clean and transform 13 tsv files in parallel and combine them into a single tsv file. Then, we performed logistic regression analysis and drew the conclusion that increasing either length or ratio would increase the odds of having either high star rating or extreme star rating.
+
+# 2. Computation Steps
+
+The statistical computation first involved transforming and merging the .tsv files. For each parallel job, the file would be downloaded and decompressed. Then, for each row, the following columns would be produced:
+
+**star_rating**: the rating of the product from 1 star to 5 stars. 1 star denotes the lowest possible rating, whereas 5 stars denotes the highest.
+
+**ratio**: the proportion of users that found the review helpful. For each row, this was calculated as helpful_votes / total_votes. If 5 users out of 10 flagged the review as helpful, the ratio for that review is 0.5. Reviews where total_votes = 0 were removed from the data set.
+
+**length**: the number of words in a review, counted as the number of character strings separated 
+with a space (" ") as the delimiter.
+
+After all 13 .tsv files were modified, we merged them into one .tsv in order to perform the analysis.
+
+CHTC job requirements: the typical job time was between 1 - 6 minutes. We requested 1 GB of memory, and 3.5 GB of disk space per job.
+
+# 3. Combined Data Summary
+
+```{r, warning = F, echo =F}
+df = read.csv("merge.tsv", sep = '\t',header= F)
+colnames(df) <- c("product_category","ratio","length","star_rating")
+df$star_rating = factor(df$star_rating)
+df$product_category = factor(df$product_category)
+summary(df)
+```
+
+### Independent Variables
+
+We used ratio and length as our independent variables (see graph below). However, from the graph we found out that there are some extreme large value for **length** variables. The length of a review above a certain threshold does not make sense in the real world. Therefore, we decided to use mean $\pm$ 3 times the standard deviation to set an upper bound and lower bound for variable length. 
+
+Besides, we thought that the ratio variable may be affected by the length variable, so we also contain an interaction term as well.
+
+```{r, fig.width=3, fig.height=2, echo = F}
+ggplot(df, aes(x=length))+
+  geom_histogram(bins = 20,color="darkblue", fill="lightblue")+
+  ggtitle("Length Histogram")
+
+ggplot(df, aes(x=ratio))+
+  geom_histogram(bins = 20,color="darkblue", fill="lightblue")+
+  ggtitle("Ratio Histogram")
+```
+
+```{r}
+upper = mean(df$length) + 3*sd(df$length) 
+lower = mean(df$length) - 3*sd(df$length) 
+df = df[(df$length>lower)&(df$length<upper),]
+```
+
+### Dependent Variables
+
+Since the variable star-rating is from 1 to 5, if we used multiple-linear regression the predicted star-rating may be higher than 5 or lower than one, which is meaningless in this scenario. Thus, our group decided to perform a logistic regression. For a logistic model, the dependent variable has to be binary. Our group came up with two ways to change our star-rating (dependent) variable. For our first model, we believe that a higher helpful ratio and longer review length might result in a better score. So we set the star-rating of 4 or 5 as high, and 1, 2 or 3 as low (low as the base level), and put them into a derived variable called star1. Second, we considered the possibility that a higher helpful ratio and longer review length might result in a more extreme star-rating. In other words, those who wrote more and contributed to a higher helpful ratio might be more likely to vote for extreme scores like 1 and 5. Thus, our second model sets the star-rating of 1 and 5 as extreme, and 2, 3 and 4 as not extreme (not extreme as the base level), and put them into a derived variable called star2. 
+
+```{r echo = F}
+df = transform(df,star1=ifelse((star_rating==4)|(star_rating==5), "high","low"))
+df$star1 = factor(df$star1)
+df$star1 = relevel(df$star1,"low")
+df = transform(df,star2=ifelse((star_rating==1)|(star_rating==5), "extreme","not extreme"))
+df$star2 = factor(df$star2)
+df$star2 = relevel(df$star2,"not extreme")
+```
+
+```{r, fig.width=2.5, fig.height=2, echo = F}
+ggplot(df, aes(x=star1))+
+  geom_bar(color="darkblue", fill="lightblue",width = 0.8)+
+  ggtitle("Star1 Histogram")
+
+ggplot(df, aes(x=star2))+
+  geom_bar(color="darkblue", fill="lightblue",width = 0.8)+
+  ggtitle("Star2 Histogram")
+```
+
+#4. Model Analysis
+
+### Model 1
+
+Estimated Model: $logit(\hat{\pi}) = 0.1990 -0.0006length + 0.8527ratio + 0.0007length * ratio$
+
+```{r echo = F}
+model1 = glm(star1 ~ length * ratio , data = df, family = "binomial")
+summary(model1)
+```
+
+### odds estimator
+
+```{r echo = F}
+wald = confint.default(object = model1, level = 0.95)
+est_df = cbind(exp(model1$coefficients),exp(wald))
+est_df
+```
+
+
+### Interpretation
+
+All ratio, length and their interaction term has an effect on the odds of having a high star rating. While holding the ratio variable constant, we are 95% confident that the odds of having a high star rating will increase by around 0.13% by 1 unit increase in length; while holding length variable constant, we are 95% confident that the odds of having a high star rating will increase by from 133% to 136% by 1 unit increase in ratio. For example, if the ratio is 0.5, length is 100, the odds of having a high star rating is around 0.6, which means the probability of having a high star rating is around 0.65. So this review is more likely to be high rating than low rating.
+
+### Model 2
+
+Estimated Model: $logit(\hat{\pi}) = 0.6568 -0.0004length + 0.1871ratio + 0.0002length * ratio$
+
+```{r echo = F}
+model2 = glm(star2 ~ length * ratio , data = df, family = "binomial")
+summary(model2)
+```
+
+### odds estimator
+```{r echo = F}
+wald = confint.default(object = model2, level = 0.95)
+est_df = cbind(exp(model2$coefficients),exp(wald))
+est_df
+```
+
+### Interpretation
+
+All ratio, length and their interaction term has an effect on the odds of having an extreme star rating. While holding the ratio variable constant, we are 95% confident that the odds of having an extreme star rating will increase by around 0.07% by 1 unit increase in length; while holding length variable constant, we are 95% confident that the odds of having an extreme star rating will increase by from 20% to 21% by 1 unit increase in ratio. For example, if the ratio is 0.5, length is 100, the odds of having an extreme star rating is around 0.68, which means the probability of having a high star rating is around 0.72. So this review is more likely to be high rating than low rating.
+
+# 5. Weakness
+Although we successfully used CHTC to clean and transform the dataset in parallel to produce a single file named merge.tsv, and both of our model’s parameters are statistically significant, there are still some weaknesses. Firstly, since we want to use the ratio of helpful votes, we divided the number of helpful votes to the number of total votes. In this case, we have to get rid of those rows with 0 total votes. The weakness for that is our model cannot estimate those who do not contribute to a vote. Secondly, since we only include the variable ratio, those who have 1 helpful vote over 1 total vote are treated exactly the same as those who have 10 helpful votes over 10 total votes, whereas the nature of the two might be very different. Lastly, the data summary shows that the number of star-ratings of 5 outnumber the number of star-ratings from 1 to 4. So, no matter how we build the logistic model differently, the nature of the model will not be as different as what we expected.
+
+
+
+# 6. Conclusion
+
+We questioned whether the ratio of helpful votes and the length of the review could be used to predict whether the rating is more likely to low or high, extreme or not extreme. Our model indicates holding other variables constant, increasing either length or ratio would increase the odds of having either high star rating or extreme star rating. However, this correlation is probably incidental, considering that the majority of reviews consist of high ratings. This means that other users are more likely to see and agree with reviews that have high ratings, and give them a “helpful” vote.
+
+# 7. GitHub Address
+
+https://github.com/gjsorrell/stat479-final-project
