@@ -1,8 +1,0 @@
-NetID, Name
-gjsorrell, Gregory Sorrell
-slee855, Sungkyun Lee
-xyang467, Sherry Yang
-cgong29, Chengjing Gong
-
-Link
-https://www.kaggle.com/datasets/cynthiarempel/amazon-us-customer-reviews-dataset?select=amazon_reviews_us_Automotive_v1_00.tsv
