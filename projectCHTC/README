@@ -10,10 +10,8 @@ the following Directed Acyclic Graph (DAG), below, to run:
             \ | /
               V
  (post 1) merge.sh
-              |
-              V
- 	   merge.csv
-
-
+ 	        
+          
+Once we get merge.tsv, we make some further transformations and logistic regression analysis in report.Rmd.
 
 git@github.com:gjsorrell/stat479-final-project.git
