@@ -1,0 +1,85 @@
+---
+title: "Stat 479 Project Proposal:"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Predicting Ratings Based on Amazon Customer Reviews
+
+## 1. Reading in the data: 
+We discovered our data on Kaggle at https://www.kaggle.com/datasets/cynthiarempel/amazon-us-customer-reviews-dataset  
+However, we used the original source featuring the same data to obtain our files. To read the data, run this shell script:  
+```
+#!/bin/bash
+# from https://s3.amazonaws.com/amazon-reviews-pds/tsv/index.txt
+wget https://s3.amazonaws.com/amazon-reviews-pds/tsv/amazon_reviews_us_Mobile_Electronics_v1_00.tsv.gz
+wget https://s3.amazonaws.com/amazon-reviews-pds/tsv/amazon_reviews_us_Mobile_Apps_v1_00.tsv.gz
+wget https://s3.amazonaws.com/amazon-reviews-pds/tsv/amazon_reviews_us_Electronics_v1_00.tsv.gz
+wget https://s3.amazonaws.com/amazon-reviews-pds/tsv/amazon_reviews_us_Digital_Video_Games_v1_00.tsv.gz
+wget https://s3.amazonaws.com/amazon-reviews-pds/tsv/amazon_reviews_us_Digital_Video_Download_v1_00.tsv.gz
+wget https://s3.amazonaws.com/amazon-reviews-pds/tsv/amazon_reviews_us_Digital_Software_v1_00.tsv.gz
+wget https://s3.amazonaws.com/amazon-reviews-pds/tsv/amazon_reviews_us_Digital_Music_Purchase_v1_00.tsv.gz
+wget https://s3.amazonaws.com/amazon-reviews-pds/tsv/amazon_reviews_us_Digital_Ebook_Purchase_v1_01.tsv.gz
+wget https://s3.amazonaws.com/amazon-reviews-pds/tsv/amazon_reviews_us_Digital_Ebook_Purchase_v1_00.tsv.gz
+wget https://s3.amazonaws.com/amazon-reviews-pds/tsv/amazon_reviews_us_Camera_v1_00.tsv.gz
+wget https://s3.amazonaws.com/amazon-reviews-pds/tsv/amazon_reviews_us_Video_Games_v1_00.tsv.gz
+wget https://s3.amazonaws.com/amazon-reviews-pds/tsv/amazon_reviews_us_Video_DVD_v1_00.tsv.gz 
+wget https://s3.amazonaws.com/amazon-reviews-pds/tsv/amazon_reviews_us_Software_v1_00.tsv.gz
+#decompress gz files
+gzip -d *.gz
+
+```  
+## 2. Description of variables:
+**We plan on using the bolded variables for our analysis.**  
+marketplace: 2 letter country code where the market took place, all “US” in these data sets  
+customer_id: The random ID for the customer who wrote the review   
+review_id: The unique ID of the review.  
+product_id: The unique ID of the product.  
+product_parent: The random ID used for aggregate reviews of the same product.  
+product_title: The title of the product.  
+product_category: The category the product belongs to.   
+**star_rating:** The rating of the product, from 1 star to 5 star.  
+**helpful_votes:** The number of helpful votes that review has.  
+**total_votes:**  The number of total votes that review has.  
+vine: If the review was written as part of the Vine program, Y/N.  
+verified_purchase: If the review is on a verified purchase, Y/N.  
+review_headline: The title of the review.  
+**review_body:** The review text, a string with words that are separated by space characters.  
+review_date: The date the review was written.  
+
+## 3. Statistical Methods:
+We want to figure out if we can predict what star-rating a customer has given based on variables related to their review data. In this scenario, we decided to perform multiple linear regression to see if star-rating is significantly affected by:  
+
+* ratio of helpful votes / total votes 
+* review length 
+* the interaction term between these variables 
+
+We will check the p-value of each coefficient to check if any of the variables are significant and will modify our model based on our p-value result.  
+If none of the coefficients are significant, we will instead figure out if we can predict what ratio of helpful votes a customer has based on star-rating and review length.
+
+
+## 4. Computational Steps:
+First, we will do 13 parallel jobs because there are 13 similar tsv files:  
+
+* For each tsv file, we will extract columns of star_rating, helpful_votes, total_votes, review_body and put these columns into one csv file called extract_{number}.csv, where the number is 1 to 13.  
+* Use R script to clean up the extract_{number}.csv:
+  + 1. use drop_na to drop rows with NA.
+  + 2. add a new column named “ratio_of_helpful_votes” by dividing helpful votes by total votes.
+  + 3. add a new column named “length_of_review ” by counting the number of words in their review.
+* Save cleaned data into a new csv file called clean_{number}.csv, where the number is 1 to 13.  
+
+Second, after doing 13  parallel jobs, we combine 13 clean_{number}.csv into a single csv file called data.csv. 
+Third, we perform the multi-linear regression on data.csv and get the p-value for each coefficient. Based on the p-value we have, we may rebuild the linear regression model to make it statistically significant and interpret the results.  
+
+## 5. GitHub link:  
+https://github.com/gjsorrell/stat479-final-project
+
+
+
+
+
+
+
