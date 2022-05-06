@@ -42,7 +42,7 @@ knitr::include_graphics("Picture1.png")
 
 We first run **13 jobs** in parallel to transform 13 tsv files: a tsv file would be downloaded and decompressed; 5 of 15 columns would be extracted, which are `product_category`, `star_rating`, `helpful_votes`, `total_votes`, and `review_body`; rows with one or more empty values are dropped; rows where `total_votes` is 0 are dropped; create `ratio` (ratio of helpful votes) variable, which was calculated by `helpful_votes` / `total_votes`; create `length` (length of review text) variable, which was the number of character strings separated by a space (" ") as the delimiter; keep only `product_category`, `ratio`,`length`, and `star_rating`. We requested **3 GB** of memory and **3.5 GB** of disk space per job and each job ran between **2 - 10 minutes**. Then, we merge all 13 processed tsv files into one single tsv file "merge.tsv" (85 MB). 
 
-We then made some further transformation in Rmd, as discussed in the rest of report, to build logistic regression model to answer our questions.
+We then made some further transformation in result.Rmd, as discussed in the rest of report, to build logistic regression model to answer our questions.
 
 ## Merged Data Summary
 
@@ -149,3 +149,6 @@ We questioned whether the ratio of helpful votes and the length of review text c
 ## GitHub Address
 
 https://github.com/gjsorrell/stat479-final-project
+
+## Contribution
+Chengjing Gong, Greg Sorrell, Sherry Yang contribute to computations and report writing; Chengjing Gong, Greg Sorrell, Sherry Yang, and Sungkyun Lee contribute to presentation slides.
