@@ -19,7 +19,7 @@ We analyzed a subset of Amazon review dataset, consisting of 13 different tsv fi
 
 To pursue these questions, we first utilized CHTC to clean and transform 13 tsv files in parallel and merge them into a small tsv file. Then, we further transformed the merged tsv file and performed logistic regression analysis.
 
-Overall, we found that shorter length of review text or higher ratio of helpful votes are more likely to have high or extreme star rating,
+Overall, we found that the length of review, the ratio of helpful votes, and their interaction term are all significantly affecting the probability of a high or an extreme star rating.
 
 ## Data Source
 
@@ -101,7 +101,7 @@ If we use multiple linear regression model, the predicted star rating may be hig
 
 To answer the question that given length of review text and the ratio of helpful votes if a user is more likely to give a high star rating or not, we set the `star_rating` of 4 or 5 as high, and 1, 2 or 3 as low (low is base level), and put them into a derived variable called `star1`.
 
-From summary below, we found that `Intercept`, `length`, `ratio`, and interaction `length:ratio` is significant. The estimated model is $ln(\frac{1-p}{p}) = 0.1990 - 0.0006length + 0.8527ratio + 0.0007length * ratio$, where $p$ is the probability of having high star rating. From visualization below, combinations of `length` and `ratio` above blue vertical lines are more likely to have high star rating. Generally, either shorter `length` or higher `ratio` are more likely to have high star rating
+From summary below, we found that `Intercept`, `length`, `ratio`, and interaction `length:ratio` is significant. The estimated model is $ln(\frac{1-p}{p}) = 0.1990 - 0.0006length + 0.8527ratio + 0.0007length * ratio$, where $p$ is the probability of having high star rating. 
 
 ```{r, fig.width=6, fig.height=4, echo = F}
 df = transform(df,star1=ifelse((star_rating==4)|(star_rating==5), "high","low"))
@@ -117,13 +117,15 @@ ggplot(predict1, aes(length, predicted_prob, color=factor(ratio), group=ratio)) 
   geom_hline(yintercept=0.5, color = "blue", size = 1.5)
 ```
 
+For clarification purpose, the y-axis represents the probability of having a high star-rating and the x-axis represent the length of the review. The different colors of each line or curve represent different ratios of helpful votes. 
+
+As the visualization shows, Regardless the helful votes ratio, those who write nothing (length=0) or write a very short review are more likely to vote for a high star-rating, whereas the probability increase as the helpful votes ratio increase. The correlation between the probability of a high star-rating and the length of the review is highly dependent on the helpful votes ratio. When the helpful votes ratio is close to 0, the initial decreasing rate of the probability is very big and is diminishing when the length increase. As the helpful votes ratio gradually increase, the initial decreasing rate of the probability decrease and tend to be a straight line (instead of diminishing). When the helpful ratio is very close to 1, the probability of getting a high star-rating increases as the review length increases. 
 
 #### Model 2
 
 To answer the question that given length of review text and the ratio of helpful votes if a user is more likely to give an extreme star rating or not,we set the `star_rating` of 1 or 5 as extreme, and 2, 3 or 4 as not extreme (not extreme is base level), and put them into a derived variable called `star2`.
 
-From summary below, we found that `Intercept`, `length`, `ratio`, and interaction `length:ratio` is significant. The estimated model is $ln(\frac{1-p}{p}) = 0.6568 -0.0004length + 0.1871ratio + 0.0002length * ratio$, where $p$ is the probability of having extreme star rating. From visualization below, combinations of `length` and `ratio` above green vertical lines are more likely to have extreme star rating. Generally, either shorter `length` or higher `ratio` are more likely to have extreme star rating.
-
+From summary below, we found that `Intercept`, `length`, `ratio`, and interaction `length:ratio` is significant. The estimated model is $ln(\frac{1-p}{p}) = 0.6568 -0.0004length + 0.1871ratio + 0.0002length * ratio$, where $p$ is the probability of having extreme star rating. 
 ```{r, fig.width=6, fig.height=4, echo = F}
 df = transform(df,star2=ifelse((star_rating==1)|(star_rating==5), "extreme","not extreme"))
 df$star2 = factor(df$star2)
@@ -138,13 +140,17 @@ ggplot(predict2, aes(length, predicted_prob, color=factor(ratio), group=ratio)) 
   geom_hline(yintercept=0.5, color = "green", size = 1.5)
 ```
 
+Again, for clarification purpose, the y-axis represents the probability of having an extreme star-rating and the x-axis represent the length of the review. The different colors of each line or curve represent different ratios of helpful votes. 
+
+As the visualization shows, Regardless of the helpful votes ratio, those who write nothing (length=0) or write a review less than 1250 words are more likely to vote for an extreme star-rating, whereas the probability increase as the helpful votes ratio increase. The correlation between the probability of an extreme star-rating and the length of the review is dependent on the helpful votes ratio (but not as highly dependent as model 1). When the helpful votes ratio is close to 0, the initial decreasing rate of the probability is very big and is diminishing when the length increase. As the helpful votes ratio gradually increase, the initial decreasing rate of the probability decrease and tend to be a straight line (instead of diminishing). 
+
 ## Weakness
 
-Although we successfully used CHTC to clean and transform the dataset in parallel to produce a single file named merge.tsv, and both of our model’s parameters are statistically significant, there are still some weaknesses. Firstly, since we want to use the ratio of helpful votes, we divided the number of helpful votes to the number of total votes. In this case, we have to get rid of those rows with 0 total votes so that our model cannot estimate those who do not have a vote. Secondly, since we only include the variable ratio, those who have 1 helpful vote over 1 total vote are treated exactly the same as those who have 10 helpful votes over 10 total votes, whereas the nature of the two might be very different. Lastly, the data summary shows that the number of star-ratings of 5 outnumber the number of star-ratings from 1 to 4. So, no matter how we build the logistic model differently, the nature of the model will not be as different as what we expected.
+Although we successfully used CHTC to clean and transform the dataset in parallel to produce a single file named merge.tsv, and both of our model’s parameters are statistically significant, there are still some weaknesses. Firstly, since we want to use the ratio of helpful votes, we divided the number of helpful votes to the number of total votes. In this case, we have to get rid of those rows with 0 total votes so that our model cannot estimate those who do not have a vote. Secondly, since we only include the variable ratio, those who have 1 helpful vote over 1 total vote are treated exactly the same as those who have 10 helpful votes over 10 total votes, whereas the nature of the two might be very different. Lastly, the data summary shows that the number of star-ratings of 5 outnumber the number of star-ratings from 1 to 4. So, no matter how we build the logistic model differently, the nature of the model will not be as different as what we expected. Last but not least, as we are using a relatively large dataset to build logistic regression models, the z scores we get are too big and the p-values might not be that useful in this scenario.
 
 ## Conclusion
 
-We questioned whether the ratio of helpful votes and the length of review text could be used to predict whether the star rating is more likely to be low or high, extreme or not extreme. Our models indicate shorter length of review text or higher ratio of helpful votes are more likely to have high or extreme star rating in general. In the future, we may include product category and 0 total vote into our model. We may also draw a random sample to make number of each star rating the same.
+We questioned whether the ratio of helpful votes and the length of review text could be used to predict whether the star rating is more likely to be low or high, extreme or not extreme. As we show in our two graphs in analysis, the length of review, the ratio of helpful votes, and their interaction term are all significantly affecting the probability of a high or an extreme star rating. In the future, we may include product category and 0 total votes into our model. We may also draw a random sample to make the number of each star rating the same.
 
 ## GitHub Address
 
