@@ -1,6 +1,5 @@
-Run "condor_submit_dag submit.dag" to get "merge.tsv", then we can run "result.Rmd"
-
-git@github.com:gjsorrell/stat479-final-project.git
+Run "condor_submit_dag submit.dag" to get "merge.tsv"
+git clone git@github.com:gjsorrell/stat479-final-project.git
 
  (pre 1)  pre.sh
               |
@@ -11,6 +10,6 @@ git@github.com:gjsorrell/stat479-final-project.git
             \ | /
               V
  (post 1) merge.sh
-              |
-              V
-         result.Rmd (in Rstudio)
+ 
+ 
+After CHTC, you need to run report.Rmd to get results of models.
