@@ -1,5 +1,6 @@
-Run "condor_submit_dag submit.dag" to cause all the code specified in
-the following Directed Acyclic Graph (DAG), below, to run:
+Run "condor_submit_dag submit.dag" to get "merge.tsv", then we can run "result.Rmd"
+
+git@github.com:gjsorrell/stat479-final-project.git
 
  (pre 1)  pre.sh
               |
@@ -10,8 +11,6 @@ the following Directed Acyclic Graph (DAG), below, to run:
             \ | /
               V
  (post 1) merge.sh
- 	        
-          
-Once we get merge.tsv, we make some further transformations and logistic regression analysis in report.Rmd.
-
-git@github.com:gjsorrell/stat479-final-project.git
+              |
+              V
+         result.Rmd (in Rstudio)
